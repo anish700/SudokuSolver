@@ -6,7 +6,7 @@ import java.awt.event.ActionListener;
 public class Main extends JFrame {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        System.out.println("Working");
         SudokuGUI obj=new SudokuGUI();
     }
 }
@@ -25,6 +25,7 @@ JMenu menu;
 //    UIManager ui=new UIManager();
 
     SudokuGUI() {
+        baseFrame = new JFrame("Sudoku");
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
@@ -45,8 +46,9 @@ JMenu menu;
         menu.add(Solve);
         menu.add(clearAll);
         menuBar.add(menu);
-        baseFrame.setMenuBar(menuBar);
-        baseFrame = new JFrame("Sudoku");
+
+        baseFrame.setJMenuBar(menuBar);
+
         baseFrame.setLayout(new GridLayout(9, 9));
         baseFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -143,3 +145,47 @@ if(e.getSource()==sudokuButtons[i][j])
         }
     }
     }
+
+    class solverClass {  // Class to implement the algorithm to solve the Puzzle
+
+        int[][] sudokuArray;  // creating an array to manipulate later
+
+        solverClass(int[][] array) {
+            this.sudokuArray = array;
+        }
+
+        solverClass() {
+        } //empty constructor
+
+        public boolean solveFunction(int[][] array) {
+            this.sudokuArray = array;
+            boolean flag = solveSudokuFn(0, 0);
+            flag = valid();
+            return flag;
+        }
+
+        public boolean solveSudokuFn(int row, int column) {  // a= row number, b= column number
+            if (row == 9) {
+                row = 0;
+                if (++column == 9) return true;
+            }
+            if (sudokuArray[row][column] != 0) return solveSudokuFn(row + 1, column);
+            for (int number = 1; number <= n; number++) {
+                if (isLegal(row, column, number)) {
+                    sudokuArray[row][column] = number;
+
+                    if (solveSudokuFn(row + 1, column)) return true;
+                }
+            }
+            sudokuArray[row][column]=0;
+            return false;
+        }
+
+            public boolean valid () {
+                return true;
+            }
+            public boolean isLegal ( int x, int y, int num){
+                return true;
+            }
+        }
+
