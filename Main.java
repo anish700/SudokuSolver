@@ -1,5 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Main extends JFrame {
 
@@ -9,35 +11,67 @@ public class Main extends JFrame {
     }
 }
 
-class SudokuGUI {
+class SudokuGUI implements ActionListener {
+
     JFrame baseFrame;
+    JMenuBar menuBar;
     int n = 9;
+JMenuItem Solve,clearAll;
+JMenu menu;
     JButton[][] sudokuButtons = new JButton[9][9];
+    Object[] selectionValues = {" ","1","2","3","4","5","6",
+            "7","8","9", "Clear all"};
+    int [][]arr = new int[n][n];
+//    UIManager ui=new UIManager();
 
     SudokuGUI() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
+        menuBar=new JMenuBar();
+        menu=new JMenu("Options");
+
+        Solve=new JMenuItem("Solve");
+        clearAll=new JMenuItem("Clear the Sudoku");
+        menu.add(Solve);
+        menu.add(clearAll);
+        menuBar.add(menu);
+        baseFrame.setMenuBar(menuBar);
         baseFrame = new JFrame("Sudoku");
         baseFrame.setLayout(new GridLayout(9, 9));
         baseFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
+        // Loop for adding the buttons and their respective ActionListener to the baseFrame is given below
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-
                 sudokuButtons[i][j] = new JButton(" ");
+                sudokuButtons[i][j].addActionListener(this);
                 baseFrame.add(sudokuButtons[i][j]).setBackground(Color.white);
-                sudokuButtons[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
+          //      sudokuButtons[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
             }
         }
-        sudokuBorder();
+
+        sudokuBorder(); //calling the function to make the darker borders in the GUI
         baseFrame.setSize(500, 500);
-        //  baseFrame.pack();
+
         baseFrame.setLocationRelativeTo(null);
         baseFrame.setVisible(true);
     }
 
     public void sudokuBorder() {
-        for (int i = 0; i < sudokuButtons.length; i++) {
-            for (int j = 0; j < 81; j++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                sudokuButtons[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
+
                 if ((i == 0 && j == 2) || (i == 0 && j == 5) || (i == 1 && j == 2) || (i == 1 && j == 5)
                         || (i == 7 && j == 2) || (i == 7 && j == 5) || (i == 4 && j == 2) || (i == 4 && j == 5)
                         || (i == 8 && j == 2) || (i == 8 && j == 5))
@@ -65,4 +99,47 @@ class SudokuGUI {
             }
         }
     }
+
+    @Override
+    // getting the action performed , ie, the input for each tile in the sudoku GUI
+    public void actionPerformed(ActionEvent e) {
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+if(e.getSource()==sudokuButtons[i][j])
+{
+    JDialog.setDefaultLookAndFeelDecorated(true);
+    String initialSelection=" ";
+    Object selection=JOptionPane.showInputDialog(null," Select a number to be inputed",
+            "SELECT OPTIONS",JOptionPane.QUESTION_MESSAGE,null,selectionValues,initialSelection);
+    if(!selection.toString().equals(selectionValues[0].toString()) &&
+            !selection.toString().equals(selectionValues[10].toString())
+    )
+    //if user has not selected Blank space or Clearing the values , we fix the value the user has chosen from the menu
+    {sudokuButtons[i][j].setText(selection.toString());
+        try{arr[i][j] =Integer.parseInt(selection.toString());}
+        catch(Exception e1){
+            e1.printStackTrace();
+        }}
+    // if user has chosen a blank space, we show it on the tile
+    if(selection.toString().equals(selectionValues[0].toString())){
+        arr[i][j]=0;
+        sudokuButtons[i][j].setText(" ");}
+
+
+    // call clearAll() method to clean the board
+    if(selection.toString().equals(selectionValues[10].toString())){
+        clearTheValues();
+    }
 }
+            }
+}
+    }
+    public void clearTheValues(){
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                arr[i][j]=0;
+                sudokuButtons[i][j].setText("");
+            }
+        }
+    }
+    }
