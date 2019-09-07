@@ -14,6 +14,8 @@ public class Main extends JFrame {
 class SudokuGUI implements ActionListener {
 
     JFrame baseFrame;
+    solverClass solverObject=new solverClass();
+
     JMenuBar menuBar;
     int n = 9;
 JMenuItem Solve,clearAll;
@@ -46,6 +48,7 @@ JMenu menu;
         menu.add(Solve);
         menu.add(clearAll);
         menuBar.add(menu);
+        Solve.addActionListener(this);clearAll.addActionListener(this);
 
         baseFrame.setJMenuBar(menuBar);
 
@@ -105,6 +108,14 @@ JMenu menu;
     @Override
     // getting the action performed , ie, the input for each tile in the sudoku GUI
     public void actionPerformed(ActionEvent e) {
+        if(e.getSource()==Solve) { // if the solution exists then print and update the GUI tile of the SudokuPuzzle
+            solverObject.solveFunction(arr);
+            updateView();
+        }
+        else  JOptionPane.showMessageDialog(null,"NO SOLUTION","ERROR",JOptionPane.ERROR_MESSAGE);
+
+        if (e.getSource()==clearAll) clearTheValues(); // clearing all values if chosen
+
         for(int i=0;i<n;i++){
             for(int j=0;j<n;j++){
 if(e.getSource()==sudokuButtons[i][j])
@@ -144,14 +155,23 @@ if(e.getSource()==sudokuButtons[i][j])
             }
         }
     }
+
+    public  void updateView(){
+        for (int i=0;i<n;i++){
+            for (int j=0;j<n;j++){
+                sudokuButtons[i][j].setText(arr[i][j]+" ");
+            }
+        }
+    }
     }
 
     class solverClass {  // Class to implement the algorithm to solve the Puzzle
-
+    int n;
         int[][] sudokuArray;  // creating an array to manipulate later
 
-        solverClass(int[][] array) {
+        solverClass(int[][] array,int n) {
             this.sudokuArray = array;
+            this.n=n;
         }
 
         solverClass() {
@@ -188,4 +208,6 @@ if(e.getSource()==sudokuButtons[i][j])
                 return true;
             }
         }
+
+
 
