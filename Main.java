@@ -2,6 +2,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class Main extends JFrame {
 
@@ -22,7 +24,7 @@ JMenuItem Solve,clearAll;
 JMenu menu;
     JButton[][] sudokuButtons = new JButton[9][9];
     Object[] selectionValues = {" ","1","2","3","4","5","6",
-            "7","8","9", "Clear all"};
+            "7","8","9","Solve", "Clear all"};
     int [][]arr = new int[n][n];
 //    UIManager ui=new UIManager();
 
@@ -112,7 +114,8 @@ JMenu menu;
             solverObject.solveFunction(arr);
             updateView();
         }
-        else  JOptionPane.showMessageDialog(null,"NO SOLUTION","ERROR",JOptionPane.ERROR_MESSAGE);
+        //
+        // else  JOptionPane.showMessageDialog(null,"NO SOLUTION","ERROR",JOptionPane.ERROR_MESSAGE);
 
         if (e.getSource()==clearAll) clearTheValues(); // clearing all values if chosen
 
@@ -138,6 +141,15 @@ if(e.getSource()==sudokuButtons[i][j])
         arr[i][j]=0;
         sudokuButtons[i][j].setText(" ");}
 
+    //------------------
+    if(selection.toString().equals(selectionValues[10].toString())) {
+        if(solverObject.solveFunction(arr))  // If solution exist print and update the board
+            updateView();
+        else {
+            JOptionPane.showMessageDialog(null, "Solution doesn't exist", "Error", JOptionPane.ERROR_MESSAGE);
+        }}
+    //--------------------
+
 
     // call clearAll() method to clean the board
     if(selection.toString().equals(selectionValues[10].toString())){
@@ -157,6 +169,7 @@ if(e.getSource()==sudokuButtons[i][j])
     }
 
     public  void updateView(){
+        System.out.println(Arrays.deepToString(arr).replace("],", "],\n"));
         for (int i=0;i<n;i++){
             for (int j=0;j<n;j++){
                 sudokuButtons[i][j].setText(arr[i][j]+" ");
@@ -166,8 +179,10 @@ if(e.getSource()==sudokuButtons[i][j])
     }
 
     class solverClass {  // Class to implement the algorithm to solve the Puzzle
+
+
     int n;
-        int[][] sudokuArray;  // creating an array to manipulate later
+    int[][] sudokuArray;  // creating an array to manipulate later
 
         solverClass(int[][] array,int n) {
             this.sudokuArray = array;
@@ -177,7 +192,7 @@ if(e.getSource()==sudokuButtons[i][j])
         solverClass() {
         } //empty constructor
 
-        public boolean solveFunction(int[][] array) {
+        public boolean solveFunction(int[][] array) {  //Function to solve the sudoku
             this.sudokuArray = array;
             boolean flag = solveSudokuFn(0, 0);
             flag = valid();
@@ -202,12 +217,72 @@ if(e.getSource()==sudokuButtons[i][j])
         }
 
             public boolean valid () {
+                for (int r = 0; r < n; r++) {
+                    for (int c = 0; c < n; c++) {
+                        if (sudokuArray[r][c] != 0) {
+                            if (isLegal(r, c) == false) return false;
+                        }
+                    }
+                }
                 return true;
             }
-            public boolean isLegal ( int x, int y, int num){
+            public boolean isLegal ( int r, int c, int num){
+            // checking the column
+                for(int i=0;i<n;i++){
+                    if (sudokuArray[r][i]==num)
+                        return false;
+                }
+                //checking the row now
+
+                for(int i=0;i<n;i++){
+                    if (sudokuArray[i][c]==num)
+                        return false;
+                }
+                int rowNo= (r/3)*3;
+                int colNo=(c/3)*3;
+                for(int i=0;i<3;i++){
+                    for(int j=0;j<3;j++){
+                        if(sudokuArray[rowNo+i][colNo+j]==num) return false;
+                    }
+                }
+
                 return true;
             }
-        }
+            public boolean isLegal(int x, int y){ HashSet<Integer> hs = new HashSet<Integer>();
+                for(int i=0;i<9;i++){
+                    if(hs.contains(sudokuArray[x][i])){
+                        return false;
+                    }
+                    if(sudokuArray[x][i]>0 || sudokuArray[x][i]<10){
+                        hs.add(sudokuArray[x][i]);
+                    }
+                }
+                hs.clear();
+                for(int i=0;i<9;i++){
+                    if(hs.contains(sudokuArray[i][y])){
+                        return false;
+                    }
+                    if(sudokuArray[i][y]>0 || sudokuArray[i][y]<10){
+                        hs.add(sudokuArray[i][y]);
+                    }
+                }
+                hs.clear();
+
+                int row =(x/3)*3;
+                int col =(y/3)*3;
+                for(int i=0;i<3;i++){
+                    for(int j=0;j<3;j++){
+                        if(hs.contains(sudokuArray[row+i][col+j]))
+                            return false;
+                        if(sudokuArray[row+i][col+j]>0 || sudokuArray[row+i][col+j]<10){
+                            hs.add(sudokuArray[row+i][col+j]);
+                        }
+                    }
+                }
+                return true;
+            }
+    }
+
 
 
 
