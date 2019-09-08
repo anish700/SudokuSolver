@@ -8,8 +8,32 @@ import java.util.HashSet;
 public class Main extends JFrame {
 
     public static void main(String[] args) {
-        System.out.println("Working");
         SudokuGUI obj=new SudokuGUI();
+        solverClass solveObj=new solverClass();
+        int[][] board = new int[][]
+                {
+                        {3, 0, 6, 5, 0, 8, 4, 0, 0},
+                        {5, 2, 0, 0, 0, 0, 0, 0, 0},
+                        {0, 8, 7, 0, 0, 0, 0, 3, 1},
+                        {0, 0, 3, 0, 1, 0, 0, 8, 0},
+                        {9, 0, 0, 8, 6, 3, 0, 0, 5},
+                        {0, 5, 0, 0, 9, 0, 6, 0, 0},
+                        {1, 3, 0, 0, 0, 0, 2, 5, 0},
+                        {0, 0, 0, 0, 0, 0, 0, 7, 4},
+                        {0, 0, 5, 2, 0, 6, 3, 0, 0}
+                };
+        int N = board.length;
+
+        if (solveObj.solveSudoku(board, N))
+        {
+           solveObj.print(board, N); // print solution
+        }
+        else
+        {
+            System.out.println("No solution");
+        }
+        System.out.println("Working");
+
     }
 }
 
@@ -20,8 +44,8 @@ class SudokuGUI implements ActionListener {
 
     JMenuBar menuBar;
     int n = 9;
-JMenuItem Solve,clearAll;
-JMenu menu;
+    JMenuItem Solve,clearAll;
+    JMenu menu;
     JButton[][] sudokuButtons = new JButton[9][9];
     Object[] selectionValues = {" ","1","2","3","4","5","6",
             "7","8","9","Solve", "Clear all"};
@@ -63,7 +87,7 @@ JMenu menu;
                 sudokuButtons[i][j] = new JButton(" ");
                 sudokuButtons[i][j].addActionListener(this);
                 baseFrame.add(sudokuButtons[i][j]).setBackground(Color.white);
-          //      sudokuButtons[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
+                //      sudokuButtons[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
             }
         }
 
@@ -111,7 +135,7 @@ JMenu menu;
     // getting the action performed , ie, the input for each tile in the sudoku GUI
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==Solve) { // if the solution exists then print and update the GUI tile of the SudokuPuzzle
-            solverObject.solveFunction(arr);
+            solverObject.solveSudoku(arr,n);
             updateView();
         }
         //
@@ -121,43 +145,43 @@ JMenu menu;
 
         for(int i=0;i<n;i++){
             for(int j=0;j<n;j++){
-if(e.getSource()==sudokuButtons[i][j])
-{
-    JDialog.setDefaultLookAndFeelDecorated(true);
-    String initialSelection=" ";
-    Object selection=JOptionPane.showInputDialog(null," Select a number to be inputed",
-            "SELECT OPTIONS",JOptionPane.QUESTION_MESSAGE,null,selectionValues,initialSelection);
-    if(!selection.toString().equals(selectionValues[0].toString()) &&
-            !selection.toString().equals(selectionValues[10].toString())
-    )
-    //if user has not selected Blank space or Clearing the values , we fix the value the user has chosen from the menu
-    {sudokuButtons[i][j].setText(selection.toString());
-        try{arr[i][j] =Integer.parseInt(selection.toString());}
-        catch(Exception e1){
-            e1.printStackTrace();
-        }}
-    // if user has chosen a blank space, we show it on the tile
-    if(selection.toString().equals(selectionValues[0].toString())){
-        arr[i][j]=0;
-        sudokuButtons[i][j].setText(" ");}
+                if(e.getSource()==sudokuButtons[i][j])
+                {
+                    JDialog.setDefaultLookAndFeelDecorated(true);
+                    String initialSelection=" ";
+                    Object selection=JOptionPane.showInputDialog(null," Select a number to be inputed",
+                            "SELECT OPTIONS",JOptionPane.QUESTION_MESSAGE,null,selectionValues,initialSelection);
+                    if(!selection.toString().equals(selectionValues[0].toString()) &&
+                            !selection.toString().equals(selectionValues[10].toString())
+                    )
+                    //if user has not selected Blank space or Clearing the values , we fix the value the user has chosen from the menu
+                    {sudokuButtons[i][j].setText(selection.toString());
+                        try{arr[i][j] =Integer.parseInt(selection.toString());}
+                        catch(Exception e1){
+                            e1.printStackTrace();
+                        }}
+                    // if user has chosen a blank space, we show it on the tile
+                    if(selection.toString().equals(selectionValues[0].toString())){
+                        arr[i][j]=0;
+                        sudokuButtons[i][j].setText(" ");}
 
-    //------------------
-    if(selection.toString().equals(selectionValues[10].toString())) {
-        if(solverObject.solveFunction(arr))  // If solution exist print and update the board
-            updateView();
-        else {
-            JOptionPane.showMessageDialog(null, "Solution doesn't exist", "Error", JOptionPane.ERROR_MESSAGE);
-        }}
-    //--------------------
+                    //------------------
+                    if(selection.toString().equals(selectionValues[10].toString())) {
+                        if(solverObject.solveSudoku(arr,n))  // If solution exist print and update the board
+                            updateView();
+                        else {
+                            JOptionPane.showMessageDialog(null, "Solution doesn't exist", "Error", JOptionPane.ERROR_MESSAGE);
+                        }}
+                    //--------------------
 
 
-    // call clearAll() method to clean the board
-    if(selection.toString().equals(selectionValues[10].toString())){
-        clearTheValues();
-    }
-}
+                    // call clearAll() method to clean the board
+                    if(selection.toString().equals(selectionValues[10].toString())){
+                        clearTheValues();
+                    }
+                }
             }
-}
+        }
     }
     public void clearTheValues(){
         for(int i=0;i<n;i++){
@@ -176,113 +200,145 @@ if(e.getSource()==sudokuButtons[i][j])
             }
         }
     }
-    }
+}
 
-    class solverClass {  // Class to implement the algorithm to solve the Puzzle
+class solverClass {  // Class to implement the algorithm to solve the Puzzle
 
 
     int n;
     int[][] sudokuArray;  // creating an array to manipulate later
 
-        solverClass(int[][] array,int n) {
-            this.sudokuArray = array;
-            this.n=n;
-        }
-
-        solverClass() {
-        } //empty constructor
-
-        public boolean solveFunction(int[][] array) {  //Function to solve the sudoku
-            this.sudokuArray = array;
-            boolean flag = solveSudokuFn(0, 0);
-            flag = valid();
-            return flag;
-        }
-
-        public boolean solveSudokuFn(int row, int column) {  // a= row number, b= column number
-            if (row == 9) {
-                row = 0;
-                if (++column == 9) return true;
-            }
-            if (sudokuArray[row][column] != 0) return solveSudokuFn(row + 1, column);
-            for (int number = 1; number <= n; number++) {
-                if (isLegal(row, column, number)) {
-                    sudokuArray[row][column] = number;
-
-                    if (solveSudokuFn(row + 1, column)) return true;
-                }
-            }
-            sudokuArray[row][column]=0;
-            return false;
-        }
-
-            public boolean valid () {
-                for (int r = 0; r < n; r++) {
-                    for (int c = 0; c < n; c++) {
-                        if (sudokuArray[r][c] != 0) {
-                            if (isLegal(r, c) == false) return false;
-                        }
-                    }
-                }
-                return true;
-            }
-            public boolean isLegal ( int r, int c, int num){
-            // checking the column
-                for(int i=0;i<n;i++){
-                    if (sudokuArray[r][i]==num)
-                        return false;
-                }
-                //checking the row now
-
-                for(int i=0;i<n;i++){
-                    if (sudokuArray[i][c]==num)
-                        return false;
-                }
-                int rowNo= (r/3)*3;
-                int colNo=(c/3)*3;
-                for(int i=0;i<3;i++){
-                    for(int j=0;j<3;j++){
-                        if(sudokuArray[rowNo+i][colNo+j]==num) return false;
-                    }
-                }
-
-                return true;
-            }
-            public boolean isLegal(int x, int y){ HashSet<Integer> hs = new HashSet<Integer>();
-                for(int i=0;i<9;i++){
-                    if(hs.contains(sudokuArray[x][i])){
-                        return false;
-                    }
-                    if(sudokuArray[x][i]>0 || sudokuArray[x][i]<10){
-                        hs.add(sudokuArray[x][i]);
-                    }
-                }
-                hs.clear();
-                for(int i=0;i<9;i++){
-                    if(hs.contains(sudokuArray[i][y])){
-                        return false;
-                    }
-                    if(sudokuArray[i][y]>0 || sudokuArray[i][y]<10){
-                        hs.add(sudokuArray[i][y]);
-                    }
-                }
-                hs.clear();
-
-                int row =(x/3)*3;
-                int col =(y/3)*3;
-                for(int i=0;i<3;i++){
-                    for(int j=0;j<3;j++){
-                        if(hs.contains(sudokuArray[row+i][col+j]))
-                            return false;
-                        if(sudokuArray[row+i][col+j]>0 || sudokuArray[row+i][col+j]<10){
-                            hs.add(sudokuArray[row+i][col+j]);
-                        }
-                    }
-                }
-                return true;
-            }
+    solverClass(int[][] array,int n) {
+        this.sudokuArray = array;
+        this.n=n;
     }
 
+    solverClass() {
+    } //empty constructor
+
+    public static boolean isSafe(int[][] board,
+                                 int row, int col,
+                                 int num)
+    {
+        // row has the unique (row-clash)
+        for (int d = 0; d < board.length; d++)
+        {
+            // if the number we are trying to
+            // place is already present in
+            // that row, return false;
+            if (board[row][d] == num)
+            {
+                return false;
+            }
+        }
+
+        // column has the unique numbers (column-clash)
+        for (int r = 0; r < board.length; r++)
+        {
+            // if the number we are trying to
+            // place is already present in
+            // that column, return false;
+
+            if (board[r][col] == num)
+            {
+                return false;
+            }
+        }
+
+        // corresponding square has
+        // unique number (box-clash)
+        int sqrt = (int) Math.sqrt(board.length);
+        int boxRowStart = row - row % sqrt;
+        int boxColStart = col - col % sqrt;
+
+        for (int r = boxRowStart;
+             r < boxRowStart + sqrt; r++)
+        {
+            for (int d = boxColStart;
+                 d < boxColStart + sqrt; d++)
+            {
+                if (board[r][d] == num)
+                {
+                    return false;
+                }
+            }
+        }
+
+        // if there is no clash, it's safe
+        return true;
+    }
+
+    public static boolean solveSudoku(int[][] board, int n)
+    {
+        int row = -1;
+        int col = -1;
+        boolean isEmpty = true;
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                if (board[i][j] == 0)
+                {
+                    row = i;
+                    col = j;
+
+                    // we still have some remaining
+                    // missing values in Sudoku
+                    isEmpty = false;
+                    break;
+                }
+            }
+            if (!isEmpty)
+            {
+                break;
+            }
+        }
+
+        // no empty space left
+        if (isEmpty)
+        {
+            return true;
+        }
+
+        // else for each-row backtrack
+        for (int num = 1; num <= n; num++)
+        {
+            if (isSafe(board, row, col, num))
+            {
+                board[row][col] = num;
+                if (solveSudoku(board, n))
+                {
+                    // print(board, n);
+                    return true;
+                }
+                else
+                {
+                    board[row][col] = 0; // replace it
+                }
+            }
+        }
+        return false;
+    }
+
+    public static void print(int[][] board, int N)
+    {
+        // we got the answer, just print it
+        for (int r = 0; r < N; r++)
+        {
+            for (int d = 0; d < N; d++)
+            {
+                System.out.print(board[r][d]);
+                System.out.print(" ");
+            }
+            System.out.print("\n");
+
+            if ((r + 1) % (int) Math.sqrt(N) == 0)
+            {
+                System.out.print("");
+            }
+        }
+    }
+}
 
 
 
