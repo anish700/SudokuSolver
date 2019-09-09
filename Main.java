@@ -2,39 +2,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Scanner;
 
 public class Main extends JFrame {
 
     public static void main(String[] args) {
+
         SudokuGUI obj=new SudokuGUI();
-        solverClass solveObj=new solverClass();
-        int[][] board = new int[][]
-                {
-                        {3, 0, 6, 5, 0, 8, 4, 0, 0},
-                        {5, 2, 0, 0, 0, 0, 0, 0, 0},
-                        {0, 8, 7, 0, 0, 0, 0, 3, 1},
-                        {0, 0, 3, 0, 1, 0, 0, 8, 0},
-                        {9, 0, 0, 8, 6, 3, 0, 0, 5},
-                        {0, 5, 0, 0, 9, 0, 6, 0, 0},
-                        {1, 3, 0, 0, 0, 0, 2, 5, 0},
-                        {0, 0, 0, 0, 0, 0, 0, 7, 4},
-                        {0, 0, 5, 2, 0, 6, 3, 0, 0}
-                };
-        int N = board.length;
+        solverClass solveObj=new solverClass();}
 
-        if (solveObj.solveSudoku(board, N))
-        {
-           solveObj.print(board, N); // print solution
-        }
-        else
-        {
-            System.out.println("No solution");
-        }
-        System.out.println("Working");
-
-    }
 }
 
 class SudokuGUI implements ActionListener {
@@ -44,7 +25,7 @@ class SudokuGUI implements ActionListener {
 
     JMenuBar menuBar;
     int n = 9;
-    JMenuItem Solve,clearAll;
+    JMenuItem chooseFileForInput,Solve,clearAll;
     JMenu menu;
     JButton[][] sudokuButtons = new JButton[9][9];
     Object[] selectionValues = {" ","1","2","3","4","5","6",
@@ -68,13 +49,16 @@ class SudokuGUI implements ActionListener {
 
         menuBar=new JMenuBar();
         menu=new JMenu("Options");
-
+        chooseFileForInput=new JMenuItem("chooseFileForInput");
         Solve=new JMenuItem("Solve");
         clearAll=new JMenuItem("Clear the Sudoku");
+        menu.add(chooseFileForInput);
         menu.add(Solve);
         menu.add(clearAll);
         menuBar.add(menu);
-        Solve.addActionListener(this);clearAll.addActionListener(this);
+        Solve.addActionListener(this);
+        clearAll.addActionListener(this);
+        chooseFileForInput.addActionListener(this);
 
         baseFrame.setJMenuBar(menuBar);
 
@@ -90,14 +74,67 @@ class SudokuGUI implements ActionListener {
                 //      sudokuButtons[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
             }
         }
+        chooseFileForInput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser("c:");
+                // Invoke the showsOpenDialog function to show the save dialog
+                int r = fileChooser.showOpenDialog(null);
 
+                // If the user selects a file
+                if (r == JFileChooser.APPROVE_OPTION) {
+                    // Set the label to the path of the selected directory
+                    File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
+
+                    try {
+                        // String
+                        String s = "", sudokuFile = "";
+                        // File reader
+                        FileReader fileReader = new FileReader(file);
+                        // Buffered reader
+                        BufferedReader bufferedReader = new BufferedReader(fileReader);
+                        // Initialize sudokuFile
+                        sudokuFile = bufferedReader.readLine();
+                        // Take the input from the file
+                        while ((s = bufferedReader.readLine()) != null) {
+                            sudokuFile = sudokuFile + "," + s;
+                        }
+                        // Set the text
+                        enterFromFile(sudokuFile);
+                    }
+                    catch (Exception evt) {
+                        JOptionPane.showMessageDialog(null, "Improper format, please try again.");
+                    }
+                }
+            }
+        });
         sudokuBorder(); //calling the function to make the darker borders in the GUI
         baseFrame.setSize(500, 500);
 
         baseFrame.setLocationRelativeTo(null);
         baseFrame.setVisible(true);
     }
+public void enterFromFile(String file){
+        String[][] sudInput2=new String[200][200];
+        int m=0;
+String[] sudInput=new String[200];
+    sudInput=file.split(",");
+for(int i=0;i<n;i++){
+   if (m==sudInput.length -1) break;;
+   for (int j=0;j<n;j++){
+       sudInput2[i][j]=sudInput[m];
+       m++;
+   }
+}
 
+    System.out.println(Arrays.deepToString(arr).replace("],", "],\n"));
+    for (int i=0;i<n;i++){
+        for (int j=0;j<n;j++){
+
+            sudokuButtons[i][j].setText(sudInput2[i][j]+" ");
+        }
+    }
+}
     public void sudokuBorder() {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -196,6 +233,7 @@ class SudokuGUI implements ActionListener {
         System.out.println(Arrays.deepToString(arr).replace("],", "],\n"));
         for (int i=0;i<n;i++){
             for (int j=0;j<n;j++){
+
                 sudokuButtons[i][j].setText(arr[i][j]+" ");
             }
         }
@@ -220,12 +258,11 @@ class solverClass {  // Class to implement the algorithm to solve the Puzzle
                                  int row, int col,
                                  int num)
     {
-        // row has the unique (row-clash)
+
+        //checking for redundancy in the rows
         for (int d = 0; d < board.length; d++)
         {
-            // if the number we are trying to
-            // place is already present in
-            // that row, return false;
+            //if redundancy in row, reuturn false
             if (board[row][d] == num)
             {
                 return false;
