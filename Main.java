@@ -1,3 +1,9 @@
+/*
+Anish R
+1710110053
+CSD311 ASSIGNMENT 2
+ */
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,17 +18,19 @@ import java.util.Scanner;
 public class Main extends JFrame {
 
     public static void main(String[] args) {
-
+int n=9;
         SudokuGUI obj=new SudokuGUI();
-        solverClass solveObj=new solverClass();}
+        solverClass solveObj=new solverClass();
+
+
+    }
 
 }
 
 class SudokuGUI implements ActionListener {
-
+//creating the required frame, menuitems,buttons
     JFrame baseFrame;
     solverClass solverObject=new solverClass();
-
     JMenuBar menuBar;
     int n = 9;
     JMenuItem chooseFileForInput,Solve,clearAll;
@@ -78,28 +86,24 @@ class SudokuGUI implements ActionListener {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser("c:");
-                // Invoke the showsOpenDialog function to show the save dialog
                 int r = fileChooser.showOpenDialog(null);
-
-                // If the user selects a file
+//invoke the Jfunction
                 if (r == JFileChooser.APPROVE_OPTION) {
-                    // Set the label to the path of the selected directory
+                    //if the user selects a file , we set the path of the selected to the label
                     File file = new File(fileChooser.getSelectedFile().getAbsolutePath());
 
                     try {
-                        // String
+
                         String s = "", sudokuFile = "";
-                        // File reader
-                        FileReader fileReader = new FileReader(file);
-                        // Buffered reader
+//creating the file reader object
+                       FileReader fileReader = new FileReader(file);
+//creating the buffer reader object
                         BufferedReader bufferedReader = new BufferedReader(fileReader);
-                        // Initialize sudokuFile
                         sudokuFile = bufferedReader.readLine();
-                        // Take the input from the file
+                        // Taking the input from the file by reading it and adding a , when required
                         while ((s = bufferedReader.readLine()) != null) {
                             sudokuFile = sudokuFile + "," + s;
                         }
-                        // Set the text
                         enterFromFile(sudokuFile);
                     }
                     catch (Exception evt) {
@@ -114,6 +118,8 @@ class SudokuGUI implements ActionListener {
         baseFrame.setLocationRelativeTo(null);
         baseFrame.setVisible(true);
     }
+
+    //function to get the input from the file and set it into the GUI
 public void enterFromFile(String file){
         String[][] sudInput2=new String[200][200];
     int[][] sudInput3=new int[200][200];
@@ -129,7 +135,7 @@ for(int i=0;i<n;i++){
        m++;
    }
 }
-
+//Setting the values into the grid tiles in the GUI
     System.out.println(Arrays.deepToString(arr).replace("],", "],\n"));
     for (int i=0;i<n;i++){
         for (int j=0;j<n;j++){
@@ -143,6 +149,7 @@ for(int i=0;i<n;i++){
 
 
 }
+// a function to highlight and make borders around to identify 3 by 3 boxes
     public void sudokuBorder() {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -180,6 +187,20 @@ for(int i=0;i<n;i++){
     // getting the action performed , ie, the input for each tile in the sudoku GUI
     public void actionPerformed(ActionEvent e) {
         if(e.getSource()==Solve) { // if the solution exists then print and update the GUI tile of the SudokuPuzzle
+            if(solverObject.solveSudoku(arr,n)==false){
+                JOptionPane.showMessageDialog(null, "  NO SOLUTION ");
+            }
+
+
+
+            for (int i=0;i<n;i++) {
+                for (int k = 0; k < n; k++) {
+                    if (!solverObject.isSafe(arr, i, k, arr[i][k])) {
+                        JOptionPane.showMessageDialog(null, " REDUNDANCY");
+                        return;
+                    }
+                }
+            }
             solverObject.solveSudoku(arr,n);
             updateView();
         }
@@ -228,6 +249,7 @@ for(int i=0;i<n;i++){
             }
         }
     }
+    // a function to clear the values in GUI
     public void clearTheValues(){
         for(int i=0;i<n;i++){
             for(int j=0;j<n;j++){
@@ -236,7 +258,7 @@ for(int i=0;i<n;i++){
             }
         }
     }
-
+// this function sets the updated values into the GUI
     public  void updateView(){
         System.out.println(Arrays.deepToString(arr).replace("],", "],\n"));
         for (int i=0;i<n;i++){
@@ -248,11 +270,13 @@ for(int i=0;i<n;i++){
     }
 }
 
-class solverClass {  // Class to implement the algorithm to solve the Puzzle
+class solverClass {
+    // Class to implement the algorithm to solve the Puzzle
 
 
     int n;
-    int[][] sudokuArray;  // creating an array to manipulate later
+    int[][] sudokuArray;
+    // creating an array to manipulate later
 
     solverClass(int[][] array,int n) {
         this.sudokuArray = array;
@@ -273,26 +297,25 @@ int[][] arrGridValues=new int[9][9];
             //if redundancy in row, reuturn false
             if (sudokuGridValues[row][d] == numberForGrid)
             {
-                return false;
+                if(d!=c)                return false;
             }
         }
 
-        // column has the unique numbers (column-clash)
-        for (int r = 0; r < sudokuGridValues.length; r++)
-        {
-            // if the number we are trying to
-            // place is already present in
-            // that column, return false;
 
+        for (int r = 0; r < sudokuGridValues.length; r++)
+        //checking for clash in column
+        {
+            //if redundant in column, return false
             if (sudokuGridValues[r][c] == numberForGrid)
             {
+                if (r!=row)
                 return false;
             }
         }
 
-        // corresponding square has
-        // unique number (box-clash)
+
         int sqrt = (int) Math.sqrt(sudokuGridValues.length);
+        //cheking for clash in 3 by 3 boxes
         int boxRowStart = row - row % sqrt;
         int boxColStart = c - c % sqrt;
 
@@ -303,7 +326,7 @@ int[][] arrGridValues=new int[9][9];
                  d < boxColStart + sqrt; d++)
             {
                 if (sudokuGridValues[r][d] == numberForGrid)
-                {
+                {if (d!=c&&r!=row)
                     return false;
                 }
             }
@@ -324,11 +347,10 @@ int[][] arrGridValues=new int[9][9];
             {
                 if (arr[i][j] == 0)
                 {
+                    // still missing nos in sudoku
                     row = i;
                     col = j;
 
-                    // we still have some remaining
-                    // missing values in Sudoku
                     isEmpty = false;
                     break;
                 }
@@ -339,35 +361,40 @@ int[][] arrGridValues=new int[9][9];
             }
         }
 
-        // no empty space left
+
         if (isEmpty)
         {
             return true;
         }
 
-        // else for each-row backtrack
+
         for (int num = 1; num <= n; num++)
+        // loop the algorithm for each
         {
             if (isSafe(arr, row, col, num))
             {
                 arr[row][col] = num;
                 if (solveSudoku(arr, n))
                 {
-                    // print(sudokuGridValues, n);
                     return true;
                 }
                 else
                 {
-                    arr[row][col] = 0; // replace it
+
+                    arr[row][col] = 0;
+
                 }
             }
+
+               // JOptionPane.showMessageDialog(null," REDUNDANCY");
+
         }
         return false;
     }
 
-    public static void print(int[][] sudokuGridValues, int N)
+    public static void printTheOutput(int[][] sudokuGridValues, int N)
     {
-        // we got the answer, just print it
+
         for (int r = 0; r < N; r++)
         {
             for (int d = 0; d < N; d++)
