@@ -116,13 +116,16 @@ class SudokuGUI implements ActionListener {
     }
 public void enterFromFile(String file){
         String[][] sudInput2=new String[200][200];
-        int m=0;
+    int[][] sudInput3=new int[200][200];
+
+    int m=0;
 String[] sudInput=new String[200];
     sudInput=file.split(",");
 for(int i=0;i<n;i++){
    if (m==sudInput.length -1) break;;
    for (int j=0;j<n;j++){
        sudInput2[i][j]=sudInput[m];
+       arr[i][j]=Integer.parseInt(sudInput[m]);
        m++;
    }
 }
@@ -134,6 +137,11 @@ for(int i=0;i<n;i++){
             sudokuButtons[i][j].setText(sudInput2[i][j]+" ");
         }
     }
+
+
+
+
+
 }
     public void sudokuBorder() {
         for (int i = 0; i < n; i++) {
@@ -204,7 +212,7 @@ for(int i=0;i<n;i++){
 
                     //------------------
                     if(selection.toString().equals(selectionValues[10].toString())) {
-                        if(solverObject.solveSudoku(arr,n))  // If solution exist print and update the board
+                        if(solverObject.solveSudoku(arr,n))  // If solution exist print and update the sudokuGridValues
                             updateView();
                         else {
                             JOptionPane.showMessageDialog(null, "Solution doesn't exist", "Error", JOptionPane.ERROR_MESSAGE);
@@ -212,7 +220,7 @@ for(int i=0;i<n;i++){
                     //--------------------
 
 
-                    // call clearAll() method to clean the board
+                    // call clearAll() method to clean the sudokuGridValues
                     if(selection.toString().equals(selectionValues[10].toString())){
                         clearTheValues();
                     }
@@ -254,29 +262,29 @@ class solverClass {  // Class to implement the algorithm to solve the Puzzle
     solverClass() {
     } //empty constructor
 
-    public static boolean isSafe(int[][] board,
-                                 int row, int col,
-                                 int num)
+    public static boolean isSafe(int[][] sudokuGridValues,
+                                 int row, int c,
+                                 int numberForGrid)
     {
-
+int[][] arrGridValues=new int[9][9];
         //checking for redundancy in the rows
-        for (int d = 0; d < board.length; d++)
+        for (int d = 0; d < sudokuGridValues.length; d++)
         {
             //if redundancy in row, reuturn false
-            if (board[row][d] == num)
+            if (sudokuGridValues[row][d] == numberForGrid)
             {
                 return false;
             }
         }
 
         // column has the unique numbers (column-clash)
-        for (int r = 0; r < board.length; r++)
+        for (int r = 0; r < sudokuGridValues.length; r++)
         {
             // if the number we are trying to
             // place is already present in
             // that column, return false;
 
-            if (board[r][col] == num)
+            if (sudokuGridValues[r][c] == numberForGrid)
             {
                 return false;
             }
@@ -284,9 +292,9 @@ class solverClass {  // Class to implement the algorithm to solve the Puzzle
 
         // corresponding square has
         // unique number (box-clash)
-        int sqrt = (int) Math.sqrt(board.length);
+        int sqrt = (int) Math.sqrt(sudokuGridValues.length);
         int boxRowStart = row - row % sqrt;
-        int boxColStart = col - col % sqrt;
+        int boxColStart = c - c % sqrt;
 
         for (int r = boxRowStart;
              r < boxRowStart + sqrt; r++)
@@ -294,19 +302,19 @@ class solverClass {  // Class to implement the algorithm to solve the Puzzle
             for (int d = boxColStart;
                  d < boxColStart + sqrt; d++)
             {
-                if (board[r][d] == num)
+                if (sudokuGridValues[r][d] == numberForGrid)
                 {
                     return false;
                 }
             }
         }
 
-        // if there is no clash, it's safe
         return true;
     }
 
-    public static boolean solveSudoku(int[][] board, int n)
-    {
+    public  boolean solveSudoku(int[][] sudokuGridValues, int n)
+    {int[][] arr=new int[n][n];
+    arr=sudokuGridValues;
         int row = -1;
         int col = -1;
         boolean isEmpty = true;
@@ -314,7 +322,7 @@ class solverClass {  // Class to implement the algorithm to solve the Puzzle
         {
             for (int j = 0; j < n; j++)
             {
-                if (board[i][j] == 0)
+                if (arr[i][j] == 0)
                 {
                     row = i;
                     col = j;
@@ -340,31 +348,31 @@ class solverClass {  // Class to implement the algorithm to solve the Puzzle
         // else for each-row backtrack
         for (int num = 1; num <= n; num++)
         {
-            if (isSafe(board, row, col, num))
+            if (isSafe(arr, row, col, num))
             {
-                board[row][col] = num;
-                if (solveSudoku(board, n))
+                arr[row][col] = num;
+                if (solveSudoku(arr, n))
                 {
-                    // print(board, n);
+                    // print(sudokuGridValues, n);
                     return true;
                 }
                 else
                 {
-                    board[row][col] = 0; // replace it
+                    arr[row][col] = 0; // replace it
                 }
             }
         }
         return false;
     }
 
-    public static void print(int[][] board, int N)
+    public static void print(int[][] sudokuGridValues, int N)
     {
         // we got the answer, just print it
         for (int r = 0; r < N; r++)
         {
             for (int d = 0; d < N; d++)
             {
-                System.out.print(board[r][d]);
+                System.out.print(sudokuGridValues[r][d]);
                 System.out.print(" ");
             }
             System.out.print("\n");
